@@ -6,27 +6,65 @@ import random
 import string
 
 suffix_dict = {
-"Images": [".jpg", ".jpeg", ".png", ".svg"],
-"Documents": [".txt", ".docx", ".doc", ".pdf", ".xlsx", ".pptx"],
-"Archives": [".zip", ".gz", ".tar"],
-"Audio": [".mp3", ".ogg", ".wav", ".amr"],
-"Video": [".avi", ".mp4", ".mov", ".mkv"],
+    "Images": [".jpg", ".jpeg", ".png", ".svg"],
+    "Documents": [".txt", ".docx", ".doc", ".pdf", ".xlsx", ".pptx"],
+    "Archives": [".zip", ".gz", ".tar"],
+    "Audio": [".mp3", ".ogg", ".wav", ".amr"],
+    "Video": [".avi", ".mp4", ".mov", ".mkv"],
 }
 
-CYRILLIC_SYMBOLS = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'
-TRANSLATION = ("a", "b", "v", "g", "d", "e", "e", "j", "z", "i", "j", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "h", "ts", "ch", "sh", "sch", "", "y", "", "e", "yu", "u", "ja")
+CYRILLIC_SYMBOLS = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+TRANSLATION = (
+    "a",
+    "b",
+    "v",
+    "g",
+    "d",
+    "e",
+    "e",
+    "j",
+    "z",
+    "i",
+    "j",
+    "k",
+    "l",
+    "m",
+    "n",
+    "o",
+    "p",
+    "r",
+    "s",
+    "t",
+    "u",
+    "f",
+    "h",
+    "ts",
+    "ch",
+    "sh",
+    "sch",
+    "",
+    "y",
+    "",
+    "e",
+    "yu",
+    "u",
+    "ja",
+)
 
 TRANS = {}
 for cyrillic, latyn in zip(CYRILLIC_SYMBOLS, TRANSLATION):
     TRANS[ord(cyrillic)] = latyn
     TRANS[ord(cyrillic.upper())] = latyn.upper()
 
+
 def normalize(name):
     global TRANS
     return name.translate(TRANS)
 
+
 def unpack(archive_path, path_to_unpack):
     return shutil.unpack_archive(archive_path, path_to_unpack)
+
 
 def is_file_exists(i, dr):
     if i in dr.iterdir():
@@ -40,6 +78,7 @@ def is_file_exists(i, dr):
         return file_path
     return i
 
+
 def is_fold_exists(i, dr):
     if dr.exists():
         folder_sort(i, dr)
@@ -47,11 +86,13 @@ def is_fold_exists(i, dr):
         Path(dr).mkdir()
         folder_sort(i, dr)
 
+
 def folder_sort(i, dr):
     latin_name = normalize(i.name)
     new_file = Path(dr, latin_name)
     file_path = is_file_exists(new_file, dr)
     i.replace(file_path)
+
 
 def sort_file(path):
     global fold
@@ -59,7 +100,14 @@ def sort_file(path):
 
     for _ in range(2):
         for i in p.iterdir():
-            if i.name in ("Documents", "Audio", "Video", "Images", "Archives", "Other"): # задаємо перелік папок, для яких сортування вмісту не застосовуємо.
+            if i.name in (
+                "Documents",
+                "Audio",
+                "Video",
+                "Images",
+                "Archives",
+                "Other",
+            ):  # задаємо перелік папок, для яких сортування вмісту не застосовуємо.
                 continue
             if i.is_file():
                 flag = False
@@ -101,22 +149,39 @@ def main(path):
                 if file.is_file():
                     total_dict[item.name].append(file.suffix)
     print()
-    print("======================= File sorting completed successfully!!! =======================")
+    print(
+        "======================= File sorting completed successfully!!! ======================="
+    )
     print()
-    print("-------------------------------------------------------------------------------------")
-    print("| {:^15} | {:^17} | {:^43} |".format("Folder name", "Number of files", "File extensions"))
-    print("-------------------------------------------------------------------------------------")
+    print(
+        "-------------------------------------------------------------------------------------"
+    )
+    print(
+        "| {:^15} | {:^17} | {:^43} |".format(
+            "Folder name", "Number of files", "File extensions"
+        )
+    )
+    print(
+        "-------------------------------------------------------------------------------------"
+    )
 
     for key, value in total_dict.items():
         k, a, b = key, len(value), ", ".join(set(value))
         print("| {:<15} | {:^17} | {:<43} |".format(k, a, b))
 
-    print("-------------------------------------------------------------------------------------")
+    print(
+        "-------------------------------------------------------------------------------------"
+    )
     print()
 
 
-if __name__ != "__main__":
-    path = sys.argv[1]
-    fold = Path(path)
-main(path)
-
+if __name__ == "__main__":
+    try:
+        path = sys.argv[1]
+        fold = Path(path)
+        if fold.exists():
+            main(fold)
+        else:
+            print("The path does not exist")
+    except IndexError:
+        print("Enter a path to folder")
